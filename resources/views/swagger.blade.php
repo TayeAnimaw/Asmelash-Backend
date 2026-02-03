@@ -34,6 +34,12 @@
             border-radius: 4px;
             font-size: 0.875rem;
         }
+
+        #swagger-ui {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
     </style>
 </head>
 
@@ -45,6 +51,7 @@
     <div id="swagger-ui"></div>
 
     <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-standalone-preset.js"></script>
     <script>
         window.onload = function () {
             SwaggerUIBundle({
@@ -58,7 +65,7 @@
                 plugins: [
                     SwaggerUIBundle.plugins.DownloadUrl
                 ],
-                layout: "StandaloneLayout",
+                layout: "BaseLayout",
                 initOAuth: {
                     clientId: 'swagger-ui',
                     scopes: []
