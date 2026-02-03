@@ -264,9 +264,9 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["email", "password"],
+                "required": ["identifier", "password"],
                 "properties": {
-                  "email": { "type": "string", "format": "email" },
+                  "identifier": { "type": "string", "description": "Email or phone number" },
                   "password": { "type": "string", "format": "password" }
                 }
               }
