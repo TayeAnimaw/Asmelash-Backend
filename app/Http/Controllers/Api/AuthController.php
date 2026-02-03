@@ -51,34 +51,37 @@ class AuthController extends Controller
             "password" => "required",
             "token" => "sometimes",
         ]);
-    
+
+        // Support both 'identifier' and 'email' for backward compatibility
+        $identifier = $validated["identifier"] ?? $request->email;
+
         // Check if the identifier is an email or phone number
-        $user = User::where("email", $validated["identifier"])
-            ->orWhere("phone", $validated["identifier"])
+        $user = User::where("email", $identifier)
+            ->orWhere("phone", $identifier)
             ->first();
-    
+
         // Validate user existence and password
         if (!$user || !Hash::check($validated["password"], $user->password)) {
             throw ValidationException::withMessages([
                 "identifier" => ["Invalid credentials"],
             ]);
         }
-    
+
         // ❌ Prevent inactive users from logging in
         if ($user->status !== "active") {
             return response()->json([
                 "error" => "Your account is inactive. Please contact an admin."
             ], 403);
         }
-    
+
         // ✅ Only active users get an authentication token
         $token = $user->createToken("auth_token")->plainTextToken;
-    
+
         return response()->json([
             "message" => "You are logged in successfully",
             "token" => $token,
             "user" => $user
-        ], 200);       
+        ], 200);
     }
 
 
@@ -99,7 +102,7 @@ class AuthController extends Controller
     //  * Handle Forgot Password Request (Send Reset Link)
     //  */
     public function forgotPassword(Request $request)
-    {       
+    {
         $request->validate([
             'email' => 'required|email|exists:users,email',
         ]);
