@@ -1,0 +1,944 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Asmelash Construction API",
+    "description": "API documentation for Asmelash Construction Management System",
+    "version": "1.0.0",
+    "contact": {
+      "name": "API Support",
+      "email": "support@asmelash-construction.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000/api",
+      "description": "Development Server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "phone": { "type": "string" },
+          "role": { "type": "string", "enum": ["admin", "sales", "quality", "production"] },
+          "status": { "type": "string", "enum": ["active", "inactive"] },
+          "avatar": { "type": "string", "nullable": true },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Item": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "item_name": { "type": "string" },
+          "item_code": { "type": "string" },
+          "category": { "type": "string", "nullable": true },
+          "unit": { "type": "string", "nullable": true },
+          "unit_price": { "type": "number", "format": "decimal" },
+          "description": { "type": "string", "nullable": true },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Project": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "customer_name": { "type": "string", "nullable": true },
+          "location": { "type": "string", "nullable": true },
+          "description": { "type": "string", "nullable": true },
+          "budget": { "type": "number", "format": "decimal" },
+          "is_active": { "type": "boolean" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Grn": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "date": { "type": "string", "format": "date" },
+          "supplier_name": { "type": "string" },
+          "purchase_order_no": { "type": "string" },
+          "total_price": { "type": "number", "format": "decimal" },
+          "details": { "type": "string", "nullable": true },
+          "project_id": { "type": "integer", "nullable": true },
+          "project": { "$ref": "#/components/schemas/Project" },
+          "items": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/GrnItem" }
+          },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "GrnItem": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "grn_id": { "type": "integer" },
+          "item_id": { "type": "integer", "nullable": true },
+          "item": { "$ref": "#/components/schemas/Item" },
+          "stock_code": { "type": "string", "nullable": true },
+          "unit": { "type": "string" },
+          "quantity": { "type": "number", "format": "decimal" },
+          "unit_price": { "type": "number", "format": "decimal" },
+          "total_price": { "type": "number", "format": "decimal" },
+          "details": { "type": "string", "nullable": true }
+        }
+      },
+      "StockBalance": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "project_id": { "type": "integer", "nullable": true },
+          "project": { "$ref": "#/components/schemas/Project" },
+          "item_id": { "type": "integer", "nullable": true },
+          "item": { "$ref": "#/components/schemas/Item" },
+          "quantity": { "type": "number", "format": "decimal" },
+          "unit": { "type": "string", "nullable": true },
+          "unit_price": { "type": "number", "format": "decimal" }
+        }
+      },
+      "StockAdjustment": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "project_id": { "type": "integer", "nullable": true },
+          "project": { "$ref": "#/components/schemas/Project" },
+          "store_keeper_id": { "type": "integer", "nullable": true },
+          "store_keeper": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer" },
+              "name": { "type": "string" }
+            }
+          },
+          "status": { "type": "string", "enum": ["not_approved", "approved"] },
+          "remarks": { "type": "string", "nullable": true },
+          "items": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/StockAdjustmentItem" }
+          },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "StockAdjustmentItem": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "stock_adjustment_id": { "type": "integer" },
+          "item_id": { "type": "integer", "nullable": true },
+          "item": { "$ref": "#/components/schemas/Item" },
+          "quantity": { "type": "number", "format": "decimal" },
+          "type": { "type": "string", "enum": ["increase", "decrease"] },
+          "reason": { "type": "string", "nullable": true }
+        }
+      },
+      "StoreIssueVoucher": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "date": { "type": "string", "format": "date" },
+          "request_no": { "type": "string", "nullable": true },
+          "project_id": { "type": "integer", "nullable": true },
+          "project": { "$ref": "#/components/schemas/Project" },
+          "user_id": { "type": "integer", "nullable": true },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer" },
+              "name": { "type": "string" }
+            }
+          },
+          "receiver_name": { "type": "string", "nullable": true },
+          "driver_name": { "type": "string", "nullable": true },
+          "plate_no": { "type": "string", "nullable": true },
+          "remarks": { "type": "string", "nullable": true },
+          "items": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/StoreIssueVoucherItem" }
+          },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "StoreIssueVoucherItem": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "store_issue_voucher_id": { "type": "integer" },
+          "item_id": { "type": "integer", "nullable": true },
+          "item": { "$ref": "#/components/schemas/Item" },
+          "item_code": { "type": "string", "nullable": true },
+          "description": { "type": "string", "nullable": true },
+          "unit": { "type": "string", "nullable": true },
+          "quantity": { "type": "number", "format": "decimal" },
+          "unit_price": { "type": "number", "format": "decimal" },
+          "total_price": { "type": "number", "format": "decimal" }
+        }
+      },
+      "PaginatedResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": { "type": "array" },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "current_page": { "type": "integer" },
+              "last_page": { "type": "integer" },
+              "per_page": { "type": "integer" },
+              "total": { "type": "integer" }
+            }
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": false },
+          "message": { "type": "string" }
+        }
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "message": { "type": "string" },
+          "data": { "type": "object" }
+        }
+      }
+    }
+  },
+  "security": [{ "bearerAuth": [] }],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Register a new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "email", "phone", "password"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "email": { "type": "string", "format": "email" },
+                  "phone": { "type": "string" },
+                  "password": { "type": "string", "format": "password" },
+                  "role": { "type": "string", "enum": ["admin", "sales", "quality", "production"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "User registered successfully" },
+          "422": { "description": "Validation error" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Login user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string", "format": "password" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Login successful" },
+          "401": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Logout user",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Logged out successfully" }
+        }
+      }
+    },
+    "/profile": {
+      "get": {
+        "tags": ["Profile"],
+        "summary": "Get current user profile",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Profile retrieved successfully" }
+        }
+      },
+      "put": {
+        "tags": ["Profile"],
+        "summary": "Update user profile",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "phone": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Profile updated successfully" }
+        }
+      }
+    },
+    "/items": {
+      "get": {
+        "tags": ["Items"],
+        "summary": "Get all items",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "search", "in": "query", "schema": { "type": "string" } },
+          { "name": "per_page", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Items retrieved successfully" }
+        }
+      },
+      "post": {
+        "tags": ["Items"],
+        "summary": "Create a new item",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["item_name", "item_code"],
+                "properties": {
+                  "item_name": { "type": "string" },
+                  "item_code": { "type": "string" },
+                  "category": { "type": "string" },
+                  "unit": { "type": "string" },
+                  "unit_price": { "type": "number" },
+                  "description": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Item created successfully" },
+          "422": { "description": "Validation error" }
+        }
+      }
+    },
+    "/items/{id}": {
+      "get": {
+        "tags": ["Items"],
+        "summary": "Get item by ID",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Item retrieved successfully" },
+          "404": { "description": "Item not found" }
+        }
+      },
+      "put": {
+        "tags": ["Items"],
+        "summary": "Update item",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Item" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Item updated successfully" },
+          "404": { "description": "Item not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Items"],
+        "summary": "Delete item",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Item deleted successfully" },
+          "404": { "description": "Item not found" }
+        }
+      }
+    },
+    "/projects": {
+      "get": {
+        "tags": ["Projects"],
+        "summary": "Get all projects",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "search", "in": "query", "schema": { "type": "string" } },
+          { "name": "per_page", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Projects retrieved successfully" }
+        }
+      },
+      "post": {
+        "tags": ["Projects"],
+        "summary": "Create a new project",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "customer_name": { "type": "string" },
+                  "location": { "type": "string" },
+                  "description": { "type": "string" },
+                  "budget": { "type": "number" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Project created successfully" },
+          "422": { "description": "Validation error" }
+        }
+      }
+    },
+    "/projects/{id}": {
+      "get": {
+        "tags": ["Projects"],
+        "summary": "Get project by ID",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Project retrieved successfully" },
+          "404": { "description": "Project not found" }
+        }
+      },
+      "put": {
+        "tags": ["Projects"],
+        "summary": "Update project",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Project" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Project updated successfully" },
+          "404": { "description": "Project not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Projects"],
+        "summary": "Delete project",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Project deleted successfully" },
+          "404": { "description": "Project not found" }
+        }
+      }
+    },
+    "/grns": {
+      "get": {
+        "tags": ["GRN"],
+        "summary": "Get all Good Receiving Notes",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "search", "in": "query", "schema": { "type": "string" } },
+          { "name": "project_id", "in": "query", "schema": { "type": "integer" } },
+          { "name": "per_page", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "GRNs retrieved successfully" }
+        }
+      },
+      "post": {
+        "tags": ["GRN"],
+        "summary": "Create a new GRN",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["date", "supplier_name", "purchase_order_no", "items"],
+                "properties": {
+                  "date": { "type": "string", "format": "date" },
+                  "supplier_name": { "type": "string" },
+                  "purchase_order_no": { "type": "string" },
+                  "details": { "type": "string" },
+                  "project_id": { "type": "integer" },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": ["unit", "quantity", "unit_price"],
+                      "properties": {
+                        "item_id": { "type": "integer" },
+                        "stock_code": { "type": "string" },
+                        "unit": { "type": "string" },
+                        "quantity": { "type": "number" },
+                        "unit_price": { "type": "number" },
+                        "details": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "GRN created successfully" },
+          "422": { "description": "Validation error" }
+        }
+      }
+    },
+    "/grns/{id}": {
+      "get": {
+        "tags": ["GRN"],
+        "summary": "Get GRN by ID",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "GRN retrieved successfully" },
+          "404": { "description": "GRN not found" }
+        }
+      },
+      "put": {
+        "tags": ["GRN"],
+        "summary": "Update GRN",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Grn" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "GRN updated successfully" },
+          "404": { "description": "GRN not found" }
+        }
+      },
+      "delete": {
+        "tags": ["GRN"],
+        "summary": "Delete GRN",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "GRN deleted successfully" },
+          "404": { "description": "GRN not found" }
+        }
+      }
+    },
+    "/stock-balances": {
+      "get": {
+        "tags": ["Stock Balance"],
+        "summary": "Get all stock balances",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "search", "in": "query", "schema": { "type": "string" } },
+          { "name": "project_id", "in": "query", "schema": { "type": "integer" } },
+          { "name": "per_page", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Stock balances retrieved successfully" }
+        }
+      },
+      "post": {
+        "tags": ["Stock Balance"],
+        "summary": "Create a new stock balance",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["quantity"],
+                "properties": {
+                  "project_id": { "type": "integer" },
+                  "item_id": { "type": "integer" },
+                  "quantity": { "type": "number" },
+                  "unit": { "type": "string" },
+                  "unit_price": { "type": "number" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Stock balance created successfully" },
+          "422": { "description": "Validation error" }
+        }
+      }
+    },
+    "/stock-balances/{id}": {
+      "get": {
+        "tags": ["Stock Balance"],
+        "summary": "Get stock balance by ID",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Stock balance retrieved successfully" },
+          "404": { "description": "Stock balance not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Stock Balance"],
+        "summary": "Delete stock balance",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Stock balance deleted successfully" },
+          "404": { "description": "Stock balance not found" }
+        }
+      }
+    },
+    "/stock-adjustments": {
+      "get": {
+        "tags": ["Stock Adjustment"],
+        "summary": "Get all stock adjustments",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "status", "in": "query", "schema": { "type": "string", "enum": ["not_approved", "approved"] } },
+          { "name": "per_page", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Stock adjustments retrieved successfully" }
+        }
+      },
+      "post": {
+        "tags": ["Stock Adjustment"],
+        "summary": "Create a new stock adjustment",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["items"],
+                "properties": {
+                  "project_id": { "type": "integer" },
+                  "remarks": { "type": "string" },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": ["quantity", "type"],
+                      "properties": {
+                        "item_id": { "type": "integer" },
+                        "quantity": { "type": "number" },
+                        "type": { "type": "string", "enum": ["increase", "decrease"] },
+                        "reason": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Stock adjustment created successfully" },
+          "422": { "description": "Validation error" }
+        }
+      }
+    },
+    "/stock-adjustments/{id}": {
+      "get": {
+        "tags": ["Stock Adjustment"],
+        "summary": "Get stock adjustment by ID",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Stock adjustment retrieved successfully" },
+          "404": { "description": "Stock adjustment not found" }
+        }
+      },
+      "post": {
+        "tags": ["Stock Adjustment"],
+        "summary": "Approve stock adjustment",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Stock adjustment approved successfully" },
+          "400": { "description": "Stock adjustment already approved" }
+        }
+      },
+      "delete": {
+        "tags": ["Stock Adjustment"],
+        "summary": "Delete stock adjustment",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Stock adjustment deleted successfully" },
+          "404": { "description": "Stock adjustment not found" }
+        }
+      }
+    },
+    "/store-issue-vouchers": {
+      "get": {
+        "tags": ["Store Issue Voucher"],
+        "summary": "Get all store issue vouchers",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "search", "in": "query", "schema": { "type": "string" } },
+          { "name": "project_id", "in": "query", "schema": { "type": "integer" } },
+          { "name": "per_page", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Store issue vouchers retrieved successfully" }
+        }
+      },
+      "post": {
+        "tags": ["Store Issue Voucher"],
+        "summary": "Create a new store issue voucher",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["items"],
+                "properties": {
+                  "date": { "type": "string", "format": "date" },
+                  "request_no": { "type": "string" },
+                  "project_id": { "type": "integer" },
+                  "receiver_name": { "type": "string" },
+                  "driver_name": { "type": "string" },
+                  "plate_no": { "type": "string" },
+                  "remarks": { "type": "string" },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": ["quantity"],
+                      "properties": {
+                        "item_id": { "type": "integer" },
+                        "item_code": { "type": "string" },
+                        "description": { "type": "string" },
+                        "unit": { "type": "string" },
+                        "quantity": { "type": "number" },
+                        "unit_price": { "type": "number" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Store issue voucher created successfully" },
+          "422": { "description": "Validation error" }
+        }
+      }
+    },
+    "/store-issue-vouchers/{id}": {
+      "get": {
+        "tags": ["Store Issue Voucher"],
+        "summary": "Get store issue voucher by ID",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Store issue voucher retrieved successfully" },
+          "404": { "description": "Store issue voucher not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Store Issue Voucher"],
+        "summary": "Delete store issue voucher",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Store issue voucher deleted successfully" },
+          "404": { "description": "Store issue voucher not found" }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get all users",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "search", "in": "query", "schema": { "type": "string" } },
+          { "name": "role", "in": "query", "schema": { "type": "string" } },
+          { "name": "per_page", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Users retrieved successfully" }
+        }
+      },
+      "post": {
+        "tags": ["Users"],
+        "summary": "Create a new user",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "email", "phone", "password"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "email": { "type": "string", "format": "email" },
+                  "phone": { "type": "string" },
+                  "role": { "type": "string", "enum": ["admin", "sales", "quality", "production"] },
+                  "password": { "type": "string", "format": "password" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "User created successfully" },
+          "422": { "description": "Validation error" }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get user by ID",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "User retrieved successfully" },
+          "404": { "description": "User not found" }
+        }
+      },
+      "put": {
+        "tags": ["Users"],
+        "summary": "Update user",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/User" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "User updated successfully" },
+          "404": { "description": "User not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Users"],
+        "summary": "Delete user",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "User deleted successfully" },
+          "404": { "description": "User not found" }
+        }
+      }
+    }
+  },
+  "tags": [
+    { "name": "Authentication", "description": "Authentication endpoints" },
+    { "name": "Profile", "description": "User profile endpoints" },
+    { "name": "Items", "description": "Items management endpoints" },
+    { "name": "Projects", "description": "Projects management endpoints" },
+    { "name": "GRN", "description": "Good Receiving Notes endpoints" },
+    { "name": "Stock Balance", "description": "Stock balance endpoints" },
+    { "name": "Stock Adjustment", "description": "Stock adjustment endpoints" },
+    { "name": "Store Issue Voucher", "description": "Store issue voucher endpoints" },
+    { "name": "Users", "description": "Users management endpoints" }
+  ]
+}
