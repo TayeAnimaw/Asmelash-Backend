@@ -47,40 +47,9 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
-    public function schedules()
-    {
-        return $this->hasMany(Schedule::class);
-    }
-    public function productionReports()
-    {
-        return $this->hasMany(ProductionReport::class);
-    }
-    public function troubles()
-    {
-        return $this->hasMany(Trouble::class);
-    }
-    public function fleetReports()
-    {
-        return $this->hasMany(FleetReport::class);
-    }
-    public function qualityTests()
-    {
-        return $this->hasMany(QualityTest::class);
-    }
-    public function qualityReports()
-    {
-        return $this->hasMany(QualityReport::class);
-    }
-    public function inventories()
-    {
-        return $this->hasMany(Inventory::class);
-    }
-    public function sales()
-    {
-        return $this->hasMany(Sale::class);
-    }
-    public function stocks()
-    {
-        return $this->hasMany(Stock::class);
-    }
+    
+    
+    
+    
+    
 }
