@@ -14,8 +14,10 @@ return new class extends Migration
         Schema::create('projects', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->text('description');
-            $table->integer('budget');
+            $table->string('customer_name')->nullable();
+            $table->string('location')->nullable();
+            $table->text('description')->nullable();
+            $table->decimal('budget', 12, 2)->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
