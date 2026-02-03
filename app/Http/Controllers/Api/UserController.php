@@ -31,10 +31,11 @@ class UserController extends Controller
         }
 
         $users = $query->paginate($request->per_page ?? 15);
+        $items = $users->items();
 
         return response()->json([
             'success' => true,
-            'data' => $users->map(function ($user) {
+            'data' => array_map(function ($user) {
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
@@ -45,7 +46,7 @@ class UserController extends Controller
                     'avatar' => $user->avatar,
                     'created_at' => $user->created_at->toIso8601String(),
                 ];
-            }),
+            }, $items),
             'meta' => [
                 'current_page' => $users->currentPage(),
                 'last_page' => $users->lastPage(),
