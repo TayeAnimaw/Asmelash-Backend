@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\GrnController;
 use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ProjectController;
+use App\Http\Controllers\Api\RevenueController;
 use App\Http\Controllers\Api\StockAdjustmentController;
 use App\Http\Controllers\Api\StockBalanceController;
 use App\Http\Controllers\Api\StoreIssueVoucherController;
@@ -116,4 +117,13 @@ Route::prefix('users')->middleware(['auth:sanctum'])->group(function () {
     Route::get('/{user}', [UserController::class, 'show']);
     Route::put('/{user}', [UserController::class, 'update']);
     Route::delete('/{user}', [UserController::class, 'destroy']);
+});
+
+// Revenue Routes
+Route::prefix('revenues')->middleware(['auth:sanctum'])->group(function () {
+    Route::get('/', [RevenueController::class, 'index']);
+    Route::post('/', [RevenueController::class, 'store']);
+    Route::get('/{revenue}', [RevenueController::class, 'show']);
+    Route::put('/{revenue}', [RevenueController::class, 'update']);
+    Route::delete('/{revenue}', [RevenueController::class, 'destroy']);
 });
