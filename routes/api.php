@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\StockAdjustmentController;
 use App\Http\Controllers\Api\StockBalanceController;
 use App\Http\Controllers\Api\StoreIssueVoucherController;
+use App\Http\Controllers\Api\StoreRequisitionController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -96,6 +97,16 @@ Route::prefix('store-issue-vouchers')->middleware(['auth:sanctum'])->group(funct
     Route::get('/{storeIssueVoucher}', [StoreIssueVoucherController::class, 'show']);
     Route::put('/{storeIssueVoucher}', [StoreIssueVoucherController::class, 'update']);
     Route::delete('/{storeIssueVoucher}', [StoreIssueVoucherController::class, 'destroy']);
+});
+
+// Store Requisition Routes
+Route::prefix('store-requisitions')->middleware(['auth:sanctum'])->group(function () {
+    Route::get('/', [StoreRequisitionController::class, 'index']);
+    Route::post('/', [StoreRequisitionController::class, 'store']);
+    Route::get('/{storeRequisition}', [StoreRequisitionController::class, 'show']);
+    Route::put('/{storeRequisition}', [StoreRequisitionController::class, 'update']);
+    Route::delete('/{storeRequisition}', [StoreRequisitionController::class, 'destroy']);
+    Route::post('/{storeRequisition}/approve', [StoreRequisitionController::class, 'approve']);
 });
 
 // Users Routes (Admin only)
